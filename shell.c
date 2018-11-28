@@ -24,17 +24,33 @@ char **parse(char *line, int argc){
 
 int main(int argc, char *argv[]){
 
+<<<<<<< HEAD
   while(1){
     pid_t child_a;
   
     char *input = calloc(256, sizeof(char));
 
     fgets(input, 256, stdin);
+=======
+  char input[256];
+  //char newinput[256];
+  char cmd[256];
+  char args[256];
+>>>>>>> d8a3cabc0ce258685b20c1653667dc6b9796dd44
 
     char **parsed = parse(input, argc);
     printf("%s %s %s\n", parsed[0], parsed[1], parsed[2]);
 
+<<<<<<< HEAD
     child_a = fork();
+=======
+  /*for (int i = 0 ; i < sizeof(input) - 2 ; i++) {
+      newinput[i] = input[i];
+  }*/
+
+  char **parsed = parse(input);
+  printf("%s %s %s\n", parsed[0], parsed[1], parsed[2]);
+>>>>>>> d8a3cabc0ce258685b20c1653667dc6b9796dd44
 
     if(child_a == 0){
       printf("%d %d\n", getpid(), getppid() );
