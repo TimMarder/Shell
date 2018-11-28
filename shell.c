@@ -41,12 +41,17 @@ void sep_cmd_arg(char **line, char *cmd, char *args){
 int main(int argc, char *argv[]){
 
   char input[256];
+  char newinput[256];
   char cmd[256];
   char args[256];
 
   fgets(input, 256, stdin);
 
-  char **parsed = parse(input);
+  for (int i = 0 ; i < sizeof(input) - 2 ; i++) {
+      newinput[i] = input[i];
+  }
+
+  char **parsed = parse(newinput);
   printf("%s %s %s\n", parsed[0], parsed[1], parsed[2]);
 
   //printf("%d\n", strncmp("-a", "-", 1));
