@@ -15,27 +15,44 @@ char **parse(char *line, int argc){
   return ret;
 }
 
+
 int main(int argc, char *argv[]){
   while(1){
     pid_t child_a;
-  
+
     char *input = calloc(256, sizeof(char));
 
     fgets(input, 256, stdin);
 
+
     char **parsed = parse(input, argc);
     printf("%s %s %s\n", parsed[0], parsed[1], parsed[2]);
 
-    child_a = fork();
-
-    if(child_a == 0){
-      printf("%d %d\n", getpid(), getppid() );
-      execvp(parsed[0], parsed);
-      printf("%s\n", strerror(errno));
-      return 0;
+    if ( strcmp(parsed[0], "cd" ) == 0) {
+        chdir(parsed[1]);
     }
-    int status;
-    int kid = wait(&status);
+
+    if else ( strcmp(parsed[0], "exit") == 0) {
+
+        exit(0);
+
+    }
+
+    else {
+
+        child_a = fork();
+
+        if(child_a == 0){
+          printf("%d %d\n", getpid(), getppid() );
+          execvp(parsed[0], parsed);
+          printf("%s\n", strerror(errno));
+          return 0;
+        }
+        int status;
+        int kid = wait(&status);
+
+    }
+
   }
   return 0;
 }
