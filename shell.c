@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
         chdir(parsed[1]);
     }
 
-    if else ( strcmp(parsed[0], "exit") == 0) {
+    else if ( strcmp(parsed[0], "exit") == 0) {
 
         exit(0);
 
