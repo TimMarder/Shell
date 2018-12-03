@@ -4,10 +4,6 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/wait.h>
-#include <fcntl.h>
-#include <signal.h>
-
-#include "shell.h"
 
 /* COUNT_TOK()
    TAKES A STRING AND RETURNS HOW MANY TOKENS ARE IN IT
@@ -93,6 +89,25 @@ int run_cmd(char *input){
   }
 }
 
+void redirectOut(char ** argsc, int argsAmount) {
+
+    char *input = malloc(10*sizeof(char *));
+      char *file = malloc(100);
+      char **args = malloc(10 * sizeof(char *));
+      FILE *fp;
+      int numtok = count_tok(input);
+      if (strchr(input, '>')){
+        input = strsep(&input, ">");
+        file = parse(input, numtok)[0];
+        args = parse(input, numtok);
+        fp = freopen(file, "w", stdout);
+        execvp(args[0], argsc);
+        fclose(fp);
+    }
+
+}
+
+
 /* RUN_MULT_CMD()
    TAKES IN A STRING, CALLS MULT_PARSE ON THE STRING,
    AND CALLS RUN_CMD ON EACH INDEX OF THE PARSED STRING
@@ -104,40 +119,6 @@ void run_mult_cmd(char *input){
     //printf("%s\n", mult_parsed[i]);
     run_cmd(mult_parsed[i]);
   }
-
-void redirectOut(char ** args, int nargs){
-  int f, status;
-  f = fork();
-  if (!f){
-    int fd = open(args[nargs-1], O_WRONLY | O_CREAT, 0777);
-    dup2(fd, 1);
-    args[nargs-2] = NULL;
-    execvp(args[0], args);
-  }
-  else {
-    wait(&status);
-  }
-}
-
-void redirectIn(char ** args, int nargs){
-  int f, status;
-  f = fork();
-  if (!f){
-    int fd = open(args[nargs-1], O_RDONLY);
-    char s[1024];
-    char cur[256];
-    dup2(fd, 0);
-    while( fgets(cur, 256, stdin))
-      strcat(s, cur);
-    args[nargs - 2] = s;
-    args[nargs - 1] = NULL;
-    execvp(args[0], args);
-  }
-  else {
-    wait(&status);
-  }
-}
-
 }
 
 /* MAIN() */
@@ -148,12 +129,6 @@ int main(int argc, int *argv[]){
     if(strstr(input, ";")){
       //RUN MULTIPLE COMMANDS
       run_mult_cmd(input);
-    }
-    else if (strstr(input, ">")) {
-        redirectOut(argc, argv);
-    }
-    else if (strstr(input, "<")) {
-        redirectIn(argc, argv);
     }
     else{
       //RUN ONE COMMAND
