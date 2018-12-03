@@ -41,6 +41,19 @@ char **parse(char *line, int numtok){
   return ret;
 }
 
+/* MULT_PARSE()
+   TAKES IN A STRING, REMOVES THE NEWLINE, SEPARATES IT BY
+   SEMICOLONS, AND RETURNS A DOUBLE POINTER
+ */
+char **mult_parse(char *line, int numtok){
+  line[strlen(line) -1] = '\0';
+  char **ret = calloc(256, sizeof(char));
+  for(int i = 0; i < numtok +1; i ++){
+    ret[i] = strsep(&line, ";");
+  }
+  return ret;
+}
+
 /* RUN_CMD()
    TAKES IN A STRING AND CALLS PARSE ON IT
    THEN IT DETERMINES IF THE COMMAND IS CD OR EXIT
@@ -51,7 +64,7 @@ int run_cmd(char *input){
   pid_t child_a;
 
   int numtok = count_tok(input);
-  printf("%d\n", numtok);
+  //printf("%d\n", numtok);
     
   char **parsed = parse(input, numtok);
   //CHANGE DIRECTORY
@@ -66,9 +79,9 @@ int run_cmd(char *input){
   else {
     child_a = fork();
     if(child_a == 0){
-      printf("%d %d\n", getpid(), getppid() );
+      //printf("%d %d\n", getpid(), getppid() );
       execvp(parsed[0], parsed);
-      printf("%s\n", strerror(errno));
+      //printf("%s\n", strerror(errno));
       return 0;
     }
     int status;
@@ -76,17 +89,17 @@ int run_cmd(char *input){
   }
 }
 
-/* MULT_PARSE()
-   TAKES IN A STRING, REMOVES THE NEWLINE, SEPARATES IT BY
-   SEMICOLONS, AND RETURNS A DOUBLE POINTER
- */
-char **mult_parse(char *line, int numtok){
-  line[strlen(line) -1] = '\0';
-  char **ret = calloc(256, sizeof(char));
-  for(int i = 0; i < numtok +1; i ++){
-    ret[i] = strsep(&line, ";");
+/* RUN_MULT_CMD()
+   TAKES IN A STRING, CALLS MULT_PARSE ON THE STRING,
+   AND CALLS RUN_CMD ON EACH INDEX OF THE PARSED STRING
+   RETURNS VOID */
+void run_mult_cmd(char *input){
+  int numtok = count_tok(input);
+  char **mult_parsed = mult_parse(input, numtok);
+  for(int i = 0; i < numtok; i ++){
+    //printf("%s\n", mult_parsed[i]);
+    run_cmd(mult_parsed[i]);
   }
-  return ret;
 }
 
 /* MAIN() */
@@ -96,12 +109,7 @@ int main(int argc, int *argv[]){
     fgets(input, 256, stdin);
     if(strstr(input, ";")){
       //RUN MULTIPLE COMMANDS
-      int numtok = count_tok(input);
-      char **mult_parsed = mult_parse(input, numtok);
-      for(int i = 0; i < numtok; i ++){
-	printf("%s\n", mult_parsed[i]);
-	run_cmd(mult_parsed[i]);
-      }
+      run_mult_cmd(input);
     }
     else{
       //RUN ONE COMMAND
