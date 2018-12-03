@@ -4,6 +4,10 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+#include <signal.h>
+
+#include "shell.h"
 
 /* COUNT_TOK()
    TAKES A STRING AND RETURNS HOW MANY TOKENS ARE IN IT
@@ -65,7 +69,7 @@ int run_cmd(char *input){
 
   int numtok = count_tok(input);
   //printf("%d\n", numtok);
-    
+
   char **parsed = parse(input, numtok);
   //CHANGE DIRECTORY
   //printf("%s %s %s\n", parsed[0], parsed[1], parsed[2]);
@@ -100,6 +104,40 @@ void run_mult_cmd(char *input){
     //printf("%s\n", mult_parsed[i]);
     run_cmd(mult_parsed[i]);
   }
+
+void redirectOut(char ** args, int nargs){
+  int f, status;
+  f = fork();
+  if (!f){
+    int fd = open(args[nargs-1], O_WRONLY | O_CREAT, 0777);
+    dup2(fd, 1);
+    args[nargs-2] = NULL;
+    execvp(args[0], args);
+  }
+  else {
+    wait(&status);
+  }
+}
+
+void redirectIn(char ** args, int nargs){
+  int f, status;
+  f = fork();
+  if (!f){
+    int fd = open(args[nargs-1], O_RDONLY);
+    char s[1024];
+    char cur[256];
+    dup2(fd, 0);
+    while( fgets(cur, 256, stdin))
+      strcat(s, cur);
+    args[nargs - 2] = s;
+    args[nargs - 1] = NULL;
+    execvp(args[0], args);
+  }
+  else {
+    wait(&status);
+  }
+}
+
 }
 
 /* MAIN() */
@@ -110,6 +148,12 @@ int main(int argc, int *argv[]){
     if(strstr(input, ";")){
       //RUN MULTIPLE COMMANDS
       run_mult_cmd(input);
+    }
+    else if (strstr(input, ">")) {
+        redirectOut(argc, argv);
+    }
+    else if (strstr(input, "<")) {
+        redirectIn(argc, argv);
     }
     else{
       //RUN ONE COMMAND
