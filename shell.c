@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/wait.h>
-#include <fcntl.h>
+#include "shell.h"
 
 /* COUNT_TOK()
    TAKES A STRING AND RETURNS HOW MANY TOKENS ARE IN IT
@@ -95,7 +96,7 @@ void redirect_in(char **parsed){
    CREATES A PIPE AND THE OUTPUT OF THE FIRST COMMAND
    BECOMES THE INPUT OF THE SECOND COMMAND
    RETURNS VOID
- */
+*/
 void pipes(char **parsed){
   printf("piping?");
   int fd[2];
@@ -154,31 +155,14 @@ int run_cmd(char *input){
   }
 }
   
-  /* RUN_MULT_CMD()
-     TAKES IN A STRING, CALLS MULT_PARSE ON THE STRING,
-     AND CALLS RUN_CMD ON EACH INDEX OF THE PARSED STRING
-     RETURNS VOID */
-  void run_mult_cmd(char *input){
-    int numtok = count_tok(input);
-    char **mult_parsed = mult_parse(input, numtok);
-    for(int i = 0; i < numtok; i ++){
-      run_cmd(mult_parsed[i]);
-    }
+/* RUN_MULT_CMD()
+   TAKES IN A STRING, CALLS MULT_PARSE ON THE STRING,
+   AND CALLS RUN_CMD ON EACH INDEX OF THE PARSED STRING
+   RETURNS VOID */
+void run_mult_cmd(char *input){
+  int numtok = count_tok(input);
+  char **mult_parsed = mult_parse(input, numtok);
+  for(int i = 0; i < numtok; i ++){
+    run_cmd(mult_parsed[i]);
   }
-
-  /* MAIN() */
-  int main(int argc, int *argv[]){
-    while(1){
-      char input[256];
-      fgets(input, 256, stdin);
-      if(strstr(input, ";")){
-	//RUN MULTIPLE COMMANDS
-	run_mult_cmd(input);
-      }
-      else{
-	//RUN ONE COMMAND
-	run_cmd(input);
-      }
-    }
-    return 0;
-  }
+}
