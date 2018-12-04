@@ -22,7 +22,7 @@
 
 ### Functions
 
-#### *int count_tok(char *input)*
+#### int count_tok(char *input)
 TAKES A STRING AND RETURNS HOW MANY TOKENS ARE IN IT ACCORDING TO HOW MANY SPACES ARE IN THE STRING
 
 #### char **parse(char *line, int numtok)
