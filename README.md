@@ -23,28 +23,28 @@
 ### Functions
 
 #### _int count_tok(char *input)_
-TAKES A STRING AND RETURNS HOW MANY TOKENS ARE IN IT ACCORDING TO HOW MANY SPACES ARE IN THE STRING
+Takes a string and returns how many tokens are in it according to how many spaces are in the string.
 
-#### char **parse(char *line, int numtok)
-TAKES A STRING AND THE NUMBER OF TOKENS IN THE STRING SEPARATES THE STRING AT THE SPACES RETURNS A DOUBLE POINTER TO THE SEPARATED STRINGS
+#### _char **parse(char *line, int numtok)_
+Takes a string and the number of tokens in the string separates the string at the spaces returns a double pointer to the separated strings.
 
-#### char **mult_parse(char *line, int numtok)
-TAKES IN A STRING, REMOVES THE NEWLINE, SEPARATES IT BY SEMICOLONS, AND RETURNS A DOUBLE POINTER
+#### _char **mult_parse(char *line, int numtok)_
+Takes in a string, removes the newline, separates it by semicolons, and returns a double pointer.
 
-#### void redirect_out(char **parsed)
-TAKES A DOUBLE POINTER AND FORKS A CHILD OPENS A FILE DUPLICATE OF STDOUT AND EXECUTES THE COMMAND RETURNS VOID
+#### _void redirect_out(char **parsed)_
+Takes a double pointer and forks a child opens a file duplicate of stdout and executes the command returns void.
 
-#### void redirect_in(char **parsed)
-TAKES IN A DOUBLE POINTER AND REDIRECTS THE INPUT OF A COMMAND FROM A FILE RETURNS VOID
+#### _void redirect_in(char **parsed)_
+Takes in a double pointer and redirects the input of a command from a file returns void.
 
-#### void pipes(char **parsed)
-TAKES IN A DOUBLE POINTER AND FORKS A CHILD CREATES A PIPE AND THE OUTPUT OF THE FIRST COMMAND BECOMES THE INPUT OF THE SECOND COMMAND RETURNS VOID
+#### _void pipes(char **parsed)_
+Takes in a double pointer and forks a child creates a pipe and the output of the first command becomes the input of the second command returns void.
    
-#### int run_cmd(char *input)
-TAKES IN A STRING AND CALLS PARSE ON IT THEN IT DETERMINES IF THE COMMAND IS CD OR EXIT IN WHICH CASE IT WILL BE IMMEDIATELY IMPLEMENTED IF IT ISN'T EITHER OF THOSE, IT WILL FORK A CHILD AND MAKE THE CHILD RUN THE COMMAND
+#### _int run_cmd(char *input)_
+Takes in a string and calls parse on it then it determines if the command is cd or exit in which case it will be immediately implemented if it isn't either of those, it will fork a child and make the child run the command.
  
-#### void run_mult_cmd(char *input)
-TAKES IN A STRING, CALLS MULT_PARSE ON THE STRING, AND CALLS RUN_CMD ON EACH INDEX OF THE PARSED STRING RETURNS VOID
+#### _void run_mult_cmd(char *input)_
+Takes in a string, calls mult_parse on the string, and calls run_cmd on each index of the parsed string returns void.
      
-#### int main(int argc, int *argv[])
-MAIN FUNCTION
+#### _int main(int argc, int *argv[])_
+Main function.
