@@ -55,16 +55,39 @@ char **mult_parse(char *line, int numtok){
   return ret;
 }
 
-void redirectOut(char **parsed){
-  //redirects stdout to a file
-  //execute command and put the results in the file specified
-  char *rem_arr = strsep(&parsed[0], '>');
-  int fd = open(parsed[2], 666, O_WRONLY);
-  dup2(fd, STDOUT_FILENO);
-  close(fd);
-  execvp(parsed[0], parsed);
+/* REDIRECT_OUT()
+   TAKES A DOUBLE POINTER AND FORKS A CHILD
+   OPENS A FILE DUPLICATE OF STDOUT AND EXECUTES THE COMMAND
+   RETURNS VOID
+*/
+void redirect_out(char **parsed){
+  pid_t child_a = fork();
+  if(child_a == 0){
+    int fd = open(parsed[2], O_CREAT | O_WRONLY , 0666);
+    dup2(fd, STDOUT_FILENO);
+    close(fd);
+    parsed[1] = NULL;
+    execvp(parsed[0], parsed);
+    exit(0);
+  }
 }
 
+/* REDIRECT_IN()
+   TAKES IN A DOUBLE POINTER AND
+   REDIRECTS THE INPUT OF A COMMAND FROM A FILE
+ */
+void redirect_in(char **parsed){
+  pid_t child_a = fork();
+  if(child_a == 0){
+    printf("1");
+    int fd = open(parsed[2], O_RDONLY, 0666);
+    dup2(fd, STDIN_FILENO);
+    close(fd);
+    parsed[1] = NULL;
+    execvp(parsed[0], parsed);
+    exit(0);
+  }
+}
 
 /* RUN_CMD()
    TAKES IN A STRING AND CALLS PARSE ON IT
@@ -73,8 +96,6 @@ void redirectOut(char **parsed){
    IF IT ISN'T EITHER OF THOSE, IT WILL FORK A CHILD
    AND MAKE THE CHILD RUN THE COMMAND */
 int run_cmd(char *input){
-  pid_t child_a;
-
   int numtok = count_tok(input);
 
   char **parsed = parse(input, numtok);
@@ -86,17 +107,20 @@ int run_cmd(char *input){
   else if ( strcmp(parsed[0], "exit") == 0) {
     exit(0);
   }
-  else if (strchr(parsed[0], '>')){
-    redirectOut(parsed);
+  //REDIRECTION
+  else if (numtok > 1 && strcmp(parsed[1], ">") == 0){
+    redirect_out(parsed);
   }
-  else {
-    child_a = fork();
+  else if (numtok > 1 && strcmp(parsed[1], "<") == 0){
+    redirect_in(parsed);
+  }
+  //EXEC COMMAND
+  else{
+    pid_t child_a = fork();
     if(child_a == 0){
       execvp(parsed[0], parsed);
-      return 0;
+      exit(0);
     }
-    int status;
-    int kid = wait(&status);
   }
 }
 
