@@ -45,7 +45,7 @@ char **parse(char *line, int numtok){
 /* MULT_PARSE()
    TAKES IN A STRING, REMOVES THE NEWLINE, SEPARATES IT BY
    SEMICOLONS, AND RETURNS A DOUBLE POINTER
- */
+*/
 char **mult_parse(char *line, int numtok){
   line[strlen(line) -1] = '\0';
   char **ret = calloc(256, sizeof(char));
@@ -75,7 +75,8 @@ void redirect_out(char **parsed){
 /* REDIRECT_IN()
    TAKES IN A DOUBLE POINTER AND
    REDIRECTS THE INPUT OF A COMMAND FROM A FILE
- */
+   RETURNS VOID
+*/
 void redirect_in(char **parsed){
   pid_t child_a = fork();
   if(child_a == 0){
@@ -87,6 +88,28 @@ void redirect_in(char **parsed){
     execvp(parsed[0], parsed);
     exit(0);
   }
+}
+
+/* PIPES()
+   TAKES IN A DOUBLE POINTER AND FORKS A CHILD
+   CREATES A PIPE AND THE OUTPUT OF THE FIRST COMMAND
+   BECOMES THE INPUT OF THE SECOND COMMAND
+   RETURNS VOID
+ */
+void pipes(char **parsed){
+  printf("piping?");
+  int fd[2];
+  pipe(fd);
+  pid_t child_a = fork();
+  if(child_a == 0){
+    dup2(fd[1], 1);
+    parsed[1] = NULL;
+    execvp(parsed[0], parsed);
+  }
+  dup2(fd[0], 0);
+  close(fd[1]);
+  parsed[1] = NULL;
+  execvp(parsed[2], parsed);
 }
 
 /* RUN_CMD()
@@ -114,6 +137,13 @@ int run_cmd(char *input){
   else if (numtok > 1 && strcmp(parsed[1], "<") == 0){
     redirect_in(parsed);
   }
+  //PIPING
+  else if (numtok > 1 && strcmp(parsed[1], "|") == 0){
+    pid_t child_a = fork();
+    if(child_a == 0){
+      pipes(parsed);
+    }
+  }
   //EXEC COMMAND
   else{
     pid_t child_a = fork();
@@ -123,32 +153,32 @@ int run_cmd(char *input){
     }
   }
 }
-
-/* RUN_MULT_CMD()
-   TAKES IN A STRING, CALLS MULT_PARSE ON THE STRING,
-   AND CALLS RUN_CMD ON EACH INDEX OF THE PARSED STRING
-   RETURNS VOID */
-void run_mult_cmd(char *input){
-  int numtok = count_tok(input);
-  char **mult_parsed = mult_parse(input, numtok);
-  for(int i = 0; i < numtok; i ++){
-    run_cmd(mult_parsed[i]);
-  }
-}
-
-/* MAIN() */
-int main(int argc, int *argv[]){
-  while(1){
-    char input[256];
-    fgets(input, 256, stdin);
-    if(strstr(input, ";")){
-      //RUN MULTIPLE COMMANDS
-      run_mult_cmd(input);
-    }
-    else{
-      //RUN ONE COMMAND
-      run_cmd(input);
+  
+  /* RUN_MULT_CMD()
+     TAKES IN A STRING, CALLS MULT_PARSE ON THE STRING,
+     AND CALLS RUN_CMD ON EACH INDEX OF THE PARSED STRING
+     RETURNS VOID */
+  void run_mult_cmd(char *input){
+    int numtok = count_tok(input);
+    char **mult_parsed = mult_parse(input, numtok);
+    for(int i = 0; i < numtok; i ++){
+      run_cmd(mult_parsed[i]);
     }
   }
-  return 0;
-}
+
+  /* MAIN() */
+  int main(int argc, int *argv[]){
+    while(1){
+      char input[256];
+      fgets(input, 256, stdin);
+      if(strstr(input, ";")){
+	//RUN MULTIPLE COMMANDS
+	run_mult_cmd(input);
+      }
+      else{
+	//RUN ONE COMMAND
+	run_cmd(input);
+      }
+    }
+    return 0;
+  }
