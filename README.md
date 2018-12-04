@@ -14,6 +14,7 @@
 ### Features not implemented
 
 - Piping with commands longer than 1 word.
+- Redirection with appends ( >> )
 
 ### Bugs
 
